@@ -67,7 +67,7 @@ class ApprovalController extends Controller
                 'reminder_sent_at'   => null,
             ]);
 
-            return ['success', 'Penggantian ' . $history->mold->part_number . ' disetujui. Jatuh tempo mold diperbarui ke '
+            return ['success', 'Penggantian ' . $history->mold->part_name . ' disetujui. Jatuh tempo mold diperbarui ke '
                 . $history->new_due_date->format('d/m/Y') . ' dan reminder direset.'];
         });
 
@@ -113,7 +113,7 @@ class ApprovalController extends Controller
                 'reject_reason' => $data['reject_reason'],
             ]);
 
-            return ['success', 'Penggantian ' . $history->mold->part_number . ' ditolak. Data mold tidak berubah.'];
+            return ['success', 'Penggantian ' . $history->mold->part_name . ' ditolak. Data mold tidak berubah.'];
         });
 
         return redirect()->route('approvals.index')->with($result[0], $result[1]);

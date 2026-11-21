@@ -32,11 +32,13 @@ class ReplacementsExport implements FromCollection, WithHeadings, WithMapping, W
         $query = ReplacementHistory::with(['mold', 'changer']);
 
         if ($q) {
-            $query->whereHas('mold', function ($m) use ($q) {
-                $m->where(function ($w) use ($q) {
-                    $w->where('part_name', 'like', '%' . $q . '%')
-                      ->orWhere('part_no', 'like', '%' . $q . '%');
-                });
+            $query->where(function ($outer) use ($q) {
+                $outer->whereHas('mold', function ($m) use ($q) {
+                    $m->where(function ($w) use ($q) {
+                        $w->where('part_name', 'like', '%' . $q . '%')
+                          ->orWhere('part_no', 'like', '%' . $q . '%');
+                    });
+                })->orWhere('replacement_location', 'like', '%' . $q . '%');
             });
         }
 
@@ -66,7 +68,7 @@ class ReplacementsExport implements FromCollection, WithHeadings, WithMapping, W
     public function headings(): array
     {
         return [
-            'No', 'Tanggal', 'Part name', 'Part no', 'Jenis', 'PIC',
+            'No', 'Tanggal', 'Part name', 'Part no', 'Lokasi penggantian', 'Jenis', 'PIC',
             'Jatuh tempo berikutnya', 'Foto sebelum', 'Foto sesudah', 'Status',
         ];
     }
@@ -81,6 +83,7 @@ class ReplacementsExport implements FromCollection, WithHeadings, WithMapping, W
             $h->replacement_date?->format('d/m/Y') ?? '-',
             $mold->part_name ?? '-',
             $partNo,
+            $h->replacement_location ?: '-',
             $mold->category ?? '-',
             $h->changer->name ?? '-',
             $h->new_due_date?->format('d/m/Y') ?? '-',
@@ -95,22 +98,22 @@ class ReplacementsExport implements FromCollection, WithHeadings, WithMapping, W
         $lastRow = max($this->items->count() + 1, 1);
 
         // Header merah
-        $sheet->getStyle('A1:J1')->applyFromArray([
+        $sheet->getStyle('A1:K1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E60012']],
             'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        $sheet->getStyle("A1:J{$lastRow}")->getBorders()->getAllBorders()
+        $sheet->getStyle("A1:K{$lastRow}")->getBorders()->getAllBorders()
             ->setBorderStyle(Border::BORDER_THIN)
             ->getColor()->setRGB('DDDDDD');
 
-        $sheet->getStyle("A2:J{$lastRow}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle("A2:K{$lastRow}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $sheet->freezePane('A2');
 
-        // Warna sel status
+        // Warna sel status (sekarang kolom K)
         foreach ($this->items->values() as $i => $h) {
-            $sheet->getStyle('J' . ($i + 2))->applyFromArray([
+            $sheet->getStyle('K' . ($i + 2))->applyFromArray([
                 'font' => ['bold' => true],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,

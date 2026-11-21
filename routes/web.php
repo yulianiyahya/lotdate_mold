@@ -5,11 +5,13 @@ use App\Http\Controllers\ReplacementController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\ReminderController;
+use App\Http\Controllers\ReminderRecipientController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\MoldController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MoldExportController;
+use App\Http\Controllers\MoldImportController;
 use App\Http\Controllers\HistoryExportController;
 use App\Http\Controllers\AtasanController;
 use Illuminate\Support\Facades\Route;
@@ -46,6 +48,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('molds/export', MoldExportController::class)->name('molds.export');
 
+    // Impor mold dari Excel (harus di atas Route::resource('molds'))
+    Route::get('molds/import', [MoldImportController::class, 'create'])->name('molds.import.create');
+    Route::post('molds/import', [MoldImportController::class, 'store'])->name('molds.import.store');
+    Route::get('molds/import/template', [MoldImportController::class, 'template'])->name('molds.import.template');
+
     Route::resource('molds', MoldController::class)->except('show');
 
     Route::get('molds/{mold}/penggantian/baru', [ReplacementController::class, 'create'])->name('replacements.create');
@@ -60,6 +67,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/reminder', [ReminderController::class, 'index'])->name('reminders.index');
     Route::post('/reminder/kirim', [ReminderController::class, 'send'])->name('reminders.send');
+
+    // Penerima reminder (hanya Atasan, dicek di controller)
+    Route::post('/reminder/penerima', [ReminderRecipientController::class, 'store'])->name('reminders.recipients.store');
+    Route::patch('/reminder/penerima/{recipient}/toggle', [ReminderRecipientController::class, 'toggle'])->name('reminders.recipients.toggle');
+    Route::delete('/reminder/penerima/{recipient}', [ReminderRecipientController::class, 'destroy'])->name('reminders.recipients.destroy');
 
     Route::resource('atasan', AtasanController::class)
         ->except('show')

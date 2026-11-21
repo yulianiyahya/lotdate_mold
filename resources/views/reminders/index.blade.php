@@ -53,4 +53,9 @@
             </tbody>
         </table>
     </div>
+
+    {{-- Penerima Reminder disembunyikan sementara. Hapus tanda komentar untuk menampilkan lagi. --}}
+    {{-- @include('reminders._recipients') --}}
+
+    @include('reminders._send_dialog')
 @endsection

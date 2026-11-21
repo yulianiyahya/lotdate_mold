@@ -119,18 +119,20 @@ class MoldController extends Controller
     private function rules(): array
     {
         return [
-            'part_name'          => ['required', 'string', 'max:150'],
-            'part_no'            => ['nullable', 'string', 'max:150'],
-            'category'           => ['nullable', Rule::in(self::CATEGORIES)],
-            'type'               => ['nullable', 'string', 'max:100'],
-            'location'           => ['nullable', 'string', 'max:100'],
-            'kebutuhan'          => ['nullable', 'integer', 'min:0'],
-            'supplier'           => ['nullable', 'string', 'max:150'],
-            'frequency_value'    => ['required', 'integer', 'min:1'],
-            'frequency_unit'     => ['required', Rule::in(self::UNITS)],
-            'lead_time_value'    => ['required', 'integer', 'min:1'],
-            'lead_time_unit'     => ['required', Rule::in(self::UNITS)],
-            'last_replaced_date' => ['required', 'date', 'before_or_equal:today'],
+            'part_name'               => ['required', 'string', 'max:150'],
+            'part_no'                 => ['nullable', 'string', 'max:150'],
+            'category'                => ['nullable', Rule::in(self::CATEGORIES)],
+            'spec'                    => ['nullable', 'string', 'max:150'],
+            'type'                    => ['nullable', 'string', 'max:100'],
+            'location'                => ['nullable', 'string', 'max:100'],
+            'location_yearly_expired' => ['nullable', 'string', 'max:150'],
+            'kebutuhan'               => ['nullable', 'integer', 'min:0'],
+            'supplier'                => ['nullable', 'string', 'max:150'],
+            'frequency_value'         => ['required', 'integer', 'min:1'],
+            'frequency_unit'          => ['required', Rule::in(self::UNITS)],
+            'lead_time_value'         => ['required', 'integer', 'min:1'],
+            'lead_time_unit'          => ['required', Rule::in(self::UNITS)],
+            'last_replaced_date'      => ['required', 'date', 'before_or_equal:today'],
         ];
     }
 
@@ -150,18 +152,20 @@ class MoldController extends Controller
     private function attributes(): array
     {
         return [
-            'part_name'          => 'Part name',
-            'part_no'            => 'Part no',
-            'category'           => 'Kategori',
-            'type'               => 'Tipe',
-            'location'           => 'Lokasi',
-            'kebutuhan'          => 'Kebutuhan',
-            'supplier'           => 'Supplier',
-            'frequency_value'    => 'Frekuensi',
-            'frequency_unit'     => 'Satuan frekuensi',
-            'lead_time_value'    => 'Lead time',
-            'lead_time_unit'     => 'Satuan lead time',
-            'last_replaced_date' => 'Penggantian terakhir',
+            'part_name'               => 'Part name',
+            'part_no'                 => 'Part no',
+            'category'                => 'Kategori',
+            'spec'                    => 'Spec',
+            'type'                    => 'Tipe',
+            'location'                => 'Lokasi',
+            'location_yearly_expired' => 'Lokasi per tahun expired',
+            'kebutuhan'               => 'Kebutuhan',
+            'supplier'                => 'Supplier',
+            'frequency_value'         => 'Frekuensi',
+            'frequency_unit'          => 'Satuan frekuensi',
+            'lead_time_value'         => 'Lead time',
+            'lead_time_unit'          => 'Satuan lead time',
+            'last_replaced_date'      => 'Penggantian terakhir',
         ];
     }
 }
