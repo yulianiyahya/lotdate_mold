@@ -34,6 +34,13 @@
         </div>
 
         <div class="field">
+            <label for="spec">Spec</label>
+            <input type="text" id="spec" name="spec"
+                   value="{{ old('spec', $m?->spec) }}">
+            @error('spec') <div class="error">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="field">
             <label for="type">Tipe</label>
             <input type="text" id="type" name="type"
                    value="{{ old('type', $m?->type) }}">
@@ -45,6 +52,13 @@
             <input type="text" id="location" name="location"
                    value="{{ old('location', $m?->location) }}">
             @error('location') <div class="error">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="field">
+            <label for="location_yearly_expired">Lokasi per tahun expired</label>
+            <input type="text" id="location_yearly_expired" name="location_yearly_expired"
+                   value="{{ old('location_yearly_expired', $m?->location_yearly_expired) }}">
+            @error('location_yearly_expired') <div class="error">{{ $message }}</div> @enderror
         </div>
 
         <div class="field">
@@ -106,7 +120,7 @@
     <div class="field">
         <label for="due_preview">Jatuh tempo berikutnya</label>
         <input type="text" id="due_preview" value="Dihitung otomatis" readonly>
-        <div class="hint">Satuan Tahun: 31 Desember di tahun (penggantian + frekuensi). Bulan/Hari: dihitung dari tanggal penggantian.</div>
+        <div class="hint">Dihitung dari tanggal penggantian terakhir + frekuensi (Hari / Bulan / Tahun).</div>
     </div>
 
     <div class="form-actions">
@@ -132,7 +146,8 @@
             let r;
 
             if (unit.value === 'Year') {
-                r = new Date(y + n, 11, 31);
+                const lastDay = new Date(y + n, mo, 0).getDate();
+                r = new Date(y + n, mo - 1, Math.min(d, lastDay));
             } else if (unit.value === 'Month') {
                 const lastDay = new Date(y, mo - 1 + n + 1, 0).getDate();
                 r = new Date(y, mo - 1 + n, Math.min(d, lastDay));

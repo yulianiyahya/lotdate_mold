@@ -17,6 +17,7 @@ class ReplacementHistory extends Model
         'old_due_date',
         'new_due_date',
         'replacement_date',
+        'replacement_location',
         'frequency_value',
         'before_photo',
         'after_photo',

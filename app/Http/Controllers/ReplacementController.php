@@ -63,6 +63,7 @@ class ReplacementController extends Controller
             'mimes'                            => ':attribute harus JPG atau PNG.',
             'before_photo.max'                 => 'Ukuran foto sebelum maksimal 4 MB.',
             'after_photo.max'                  => 'Ukuran foto sesudah maksimal 4 MB.',
+            'replacement_location.max'         => 'Lokasi penggantian terlalu panjang (maksimal 150 karakter).',
             'frequency_value.between'          => 'Frekuensi penggantian harus antara 1 dan ' . $maxFrequency . ' ' . strtolower(Mold::UNITS[$unit] ?? 'tahun') . '.',
             'replacement_date.before_or_equal' => 'Tanggal penggantian tidak boleh melewati hari ini.',
         ];
@@ -73,16 +74,18 @@ class ReplacementController extends Controller
         }
 
         $data = $request->validate([
-            'replacement_date' => $dateRule,
-            'frequency_value'  => ['required', 'integer', 'between:1,' . $maxFrequency],
-            'before_photo'     => $photoRule,
-            'after_photo'      => $photoRule,
-            'notes'            => ['nullable', 'string', 'max:1000'],
+            'replacement_date'     => $dateRule,
+            'replacement_location' => ['required', 'string', 'max:150'],
+            'frequency_value'      => ['required', 'integer', 'between:1,' . $maxFrequency],
+            'before_photo'         => $photoRule,
+            'after_photo'          => $photoRule,
+            'notes'                => ['nullable', 'string', 'max:1000'],
         ], $messages, [
-            'replacement_date' => 'Tanggal penggantian',
-            'frequency_value'  => 'Frekuensi penggantian',
-            'before_photo'     => 'Foto sebelum',
-            'after_photo'      => 'Foto sesudah',
+            'replacement_date'     => 'Tanggal penggantian',
+            'replacement_location' => 'Lokasi penggantian',
+            'frequency_value'      => 'Frekuensi penggantian',
+            'before_photo'         => 'Foto sebelum',
+            'after_photo'          => 'Foto sesudah',
         ]);
 
         $beforePath = $request->file('before_photo')->store('replacements', 'public');
@@ -90,17 +93,18 @@ class ReplacementController extends Controller
 
         DB::transaction(function () use ($data, $mold, $approvers, $beforePath, $afterPath, $unit) {
             $history = ReplacementHistory::create([
-                'mold_id'          => $mold->id,
-                'old_due_date'     => $mold->next_due_date,
+                'mold_id'              => $mold->id,
+                'old_due_date'         => $mold->next_due_date,
                 // Satuan mengikuti mold (Day / Month / Year), bukan selalu tahun.
-                'new_due_date'     => Mold::calculateDueDate($data['replacement_date'], (int) $data['frequency_value'], $unit),
-                'replacement_date' => $data['replacement_date'],
-                'frequency_value'  => $data['frequency_value'],
-                'before_photo'     => $beforePath,
-                'after_photo'      => $afterPath,
-                'notes'            => $data['notes'] ?? null,
-                'status'           => 'pending',
-                'changed_by'       => auth()->id(),
+                'new_due_date'         => Mold::calculateDueDate($data['replacement_date'], (int) $data['frequency_value'], $unit),
+                'replacement_date'     => $data['replacement_date'],
+                'replacement_location' => $data['replacement_location'],
+                'frequency_value'      => $data['frequency_value'],
+                'before_photo'         => $beforePath,
+                'after_photo'          => $afterPath,
+                'notes'                => $data['notes'] ?? null,
+                'status'               => 'pending',
+                'changed_by'           => auth()->id(),
             ]);
 
             foreach ($approvers->values() as $i => $approver) {

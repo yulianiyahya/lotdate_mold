@@ -14,7 +14,8 @@ class Mold extends Model
     public const UNITS = ['Day' => 'Hari', 'Month' => 'Bulan', 'Year' => 'Tahun'];
 
     protected $fillable = [
-        'part_name', 'part_no', 'category', 'type', 'location',
+        'part_name', 'part_no', 'category', 'spec', 'type', 'location',
+        'location_yearly_expired',
         'installed_by', 'supplier', 'kebutuhan', 'pic_id',
         'frequency_value', 'frequency_unit',
         'lead_time_value', 'lead_time_unit',
@@ -41,7 +42,7 @@ class Mold extends Model
     }
 
     /**
-     * Year  : 31 Desember pada (tahun penggantian + frekuensi), aturan lama tetap.
+     * Year  : tambah tahun dari tanggal penggantian (01/01/2021 + 6 tahun = 01/01/2027).
      * Month : tambah bulan dari tanggal penggantian.
      * Day   : tambah hari dari tanggal penggantian.
      */
@@ -52,7 +53,7 @@ class Mold extends Model
         return match ($unit) {
             'Day'   => $date->addDays($value),
             'Month' => $date->addMonthsNoOverflow($value),
-            default => Carbon::create($date->year + $value, 12, 31)->startOfDay(),
+            default => $date->addYearsNoOverflow($value),
         };
     }
 

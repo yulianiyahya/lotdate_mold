@@ -10,17 +10,19 @@ class HistoryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ReplacementHistory::with(['mold', 'changer']);
+        $query = ReplacementHistory::with(['mold', 'changer', 'approvals.approver']);
 
-        // Cari berdasarkan nama part atau nomor part
+        // Cari berdasarkan nama part, nomor part, atau lokasi penggantian
         if ($request->filled('q')) {
             $keyword = $request->q;
 
-            $query->whereHas('mold', function ($m) use ($keyword) {
-                $m->where(function ($w) use ($keyword) {
-                    $w->where('part_name', 'like', '%' . $keyword . '%')
-                      ->orWhere('part_no', 'like', '%' . $keyword . '%');
-                });
+            $query->where(function ($outer) use ($keyword) {
+                $outer->whereHas('mold', function ($m) use ($keyword) {
+                    $m->where(function ($w) use ($keyword) {
+                        $w->where('part_name', 'like', '%' . $keyword . '%')
+                          ->orWhere('part_no', 'like', '%' . $keyword . '%');
+                    });
+                })->orWhere('replacement_location', 'like', '%' . $keyword . '%');
             });
         }
 

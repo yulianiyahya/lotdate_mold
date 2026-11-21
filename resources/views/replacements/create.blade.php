@@ -59,6 +59,14 @@
                     @error('replacement_date') <div class="error">{{ $message }}</div> @enderror
                 </div>
 
+                <div class="field">
+                    <label for="replacement_location">Lokasi penggantian</label>
+                    <input type="text" id="replacement_location" name="replacement_location"
+                           maxlength="150" placeholder="Contoh: KBI 1"
+                           value="{{ old('replacement_location', $mold->location) }}" required>
+                    @error('replacement_location') <div class="error">{{ $message }}</div> @enderror
+                </div>
+
                 <div class="grid-2">
                     <div class="field">
                         <label for="frequency_value">Frekuensi penggantian</label>
@@ -77,7 +85,7 @@
                         <input type="text" id="new_due" value="Dihitung otomatis" readonly>
                         <div class="hint">
                             @if ($unitKey === 'Year')
-                                Selalu akhir tahun: 31 Desember tahun penggantian ditambah frekuensi.
+                                Dihitung dari tanggal penggantian ditambah jumlah tahun.
                             @elseif ($unitKey === 'Month')
                                 Dihitung dari tanggal penggantian ditambah jumlah bulan.
                             @else
@@ -134,6 +142,7 @@
             <div class="summary-row"><span>Part no</span><b>{{ $partNos ?: '-' }}</b></div>
             <div class="summary-row"><span>Kategori</span><b>{{ $mold->category ?: '-' }}</b></div>
             <div class="summary-row"><span>Tipe</span><b>{{ $mold->type ?: '-' }}</b></div>
+            <div class="summary-row"><span>Lokasi penggantian</span><b id="sum_loc">{{ old('replacement_location', $mold->location) ?: '-' }}</b></div>
             <div class="summary-row"><span>Jatuh tempo lama</span><b>{{ $mold->next_due_date->format('d/m/Y') }}</b></div>
             <div class="summary-row"><span>Status saat ini</span><span class="badge badge-{{ $mold->status }}">{{ $mold->status_label }}</span></div>
             <div class="summary-row"><span>Status setelah disetujui</span><span id="sum_status">-</span></div>
@@ -162,10 +171,12 @@
 
             const date      = document.getElementById('replacement_date');
             const freq      = document.getElementById('frequency_value');
+            const loc       = document.getElementById('replacement_location');
             const newDue    = document.getElementById('new_due');
             const sumDue    = document.getElementById('sum_due');
             const sumFreq   = document.getElementById('sum_freq');
             const sumStatus = document.getElementById('sum_status');
+            const sumLoc    = document.getElementById('sum_loc');
 
             function parseDate(s) {
                 const p = s.split('-').map(Number);
@@ -183,7 +194,8 @@
             function dueDate(d, n) {
                 if (cfg.unit === 'Day')   return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
                 if (cfg.unit === 'Month') return addMonths(d, n);
-                return new Date(d.getFullYear() + n, 11, 31);
+                // Year: setara addYearsNoOverflow
+                return addMonths(d, 12 * n);
             }
 
             function warnStart(due) {
@@ -234,6 +246,9 @@
 
             date.addEventListener('input', update);
             freq.addEventListener('input', update);
+            loc.addEventListener('input', function () {
+                sumLoc.textContent = loc.value.trim() || '-';
+            });
             update();
 
             document.querySelectorAll('.dropzone input').forEach(function (input) {
